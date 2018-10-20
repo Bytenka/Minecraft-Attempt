@@ -3,6 +3,9 @@
 #include "../utils/Exceptions.h"
 #include "../utils/Logging.h"
 
+#include "../graphics/Shader.h"
+#include "../graphics/Image.h"
+
 namespace tk
 {
 Application::Application() noexcept
@@ -24,7 +27,6 @@ Application::Application() noexcept
     }
     catch (RuntimeException &e)
     {
-        e.pushCurrentContext(__FUNCTION__, "Application");
     }
 }
 
@@ -38,17 +40,79 @@ Application::~Application() noexcept
 
 // public:
 
-void Application::createWindow(const std::string &title, unsigned width, unsigned height) noexcept
+void Application::startLoop()
 {
-    std::unique_ptr<Window> newWindow = std::make_unique<Window>(width, height, title);
-    m_windows.push_back(std::move(newWindow));
+    // @TODO Cleanup debugging stuff
+
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f};
+
+    GLuint indices[] = {
+        0, 1, 2,
+        0, 2, 3};
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint vbo, ebo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    Shader mainShader("resources/shaders/default.vert", "resources/shaders/default.frag");
+    mainShader.enable();
+
+    bool appShouldTerminate = false;
+    while (!appShouldTerminate)
+    {
+        for (int i = m_windows.size() - 1; i >= 0; i--)
+        {
+            auto &currentPair = m_windows[i];
+            auto &w = currentPair.second;
+            w->setContextCurrent();
+            w->update();
+            w->clear({127, 127, 255});
+            // pull data to draw. This shall push to GL
+
+            glBindVertexArray(vao);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+            w->draw();
+
+            if (w->shouldClose())
+            {
+                if (currentPair.first == m_mainWindowUID)
+                    appShouldTerminate = true;
+                m_windows.erase(m_windows.begin() + i);
+            }
+        }
+    }
 }
 
-void Application::destroyWindow(const std::string &title) noexcept
+unsigned Application::createWindow(const std::string &title, unsigned width, unsigned height) noexcept
+{
+    unsigned uid = m_windowsUIDCounter++;
+    auto newWindow = std::make_pair(uid, std::make_unique<Window>(width, height, title));
+    m_windows.push_back(std::move(newWindow));
+    return uid;
+}
+
+void Application::destroyWindow(unsigned windowUID) noexcept
 {
     try
     {
-        m_windows.erase(m_windows.begin() + getIndexOfWindow(title));
+        m_windows.erase(m_windows.begin() + getIndexOfWindow(windowUID));
     }
     catch (RuntimeException &e)
     {
@@ -60,7 +124,7 @@ void Application::updateWindowSize(GLFWwindow *window, int width, int height) no
 {
     try
     {
-        m_windows[getIndexOfGLFWWindow(window)]->updateSize(width, height);
+        m_windows[getIndexOfGLFWWindow(window)].second->updateSize(width, height);
     }
     catch (RuntimeException &e)
     {
@@ -72,7 +136,7 @@ void Application::updateWindowCursorPosition(GLFWwindow *window, double xpos, do
 {
     try
     {
-        m_windows[getIndexOfGLFWWindow(window)]->updateCursorPosition(xpos, ypos);
+        m_windows[getIndexOfGLFWWindow(window)].second->updateCursorPosition(xpos, ypos);
     }
     catch (RuntimeException &e)
     {
@@ -80,46 +144,35 @@ void Application::updateWindowCursorPosition(GLFWwindow *window, double xpos, do
     }
 }
 
-void Application::startLoop()
+void Application::setWindowIcon(unsigned windowUID, const std::string &iconPath)
 {
-    bool appShouldTerminate = false;
-    while (!appShouldTerminate) // @TODO Is this good ?
+    try
     {
-        for (int i = m_windows.size() - 1; i >= 0; i--)
-        {
-            auto &w = m_windows[i];
-            w->setContextCurrent();
-            w->update();
-            w->clear({127, 127, 255});
-            w->draw();
-
-            if (w->shouldClose())
-            {
-                if (w->getTitle() == m_mainWindowName)
-                    appShouldTerminate = true;
-                m_windows.erase(m_windows.begin() + i);
-            }
-        }
+        m_windows[getIndexOfWindow(windowUID)].second->setIcon(Image(iconPath));
+    }
+    catch (RuntimeException &e)
+    {
+        e.pushCurrentContext(__FUNCTION__);
     }
 }
 
 // private:
 
-unsigned Application::getIndexOfWindow(const std::string &title)
+unsigned Application::getIndexOfWindow(unsigned windowUID)
 {
     for (int i = m_windows.size() - 1; i >= 0; i--)
     {
-        if (m_windows[i]->getTitle() == title)
+        if (m_windows[i].first == windowUID)
             return i;
     }
-    throw RuntimeException(__FUNCTION__, "Window " + title + " does not exist!");
+    throw RuntimeException(__FUNCTION__, "Window " + std::to_string(windowUID) + " does not exist!");
 }
 
 unsigned Application::getIndexOfGLFWWindow(GLFWwindow *window)
 {
     for (int i = m_windows.size() - 1; i >= 0; i--)
     {
-        if (&*(m_windows[i]->getGLFWWindow()) == *&window)
+        if (&*(m_windows[i].second->getGLFWWindow()) == *&window)
             return i;
     }
     throw RuntimeException(__FUNCTION__, "GLFW window does not exist!");

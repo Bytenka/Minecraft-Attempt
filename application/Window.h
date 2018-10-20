@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../graphics/Image.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -26,7 +28,7 @@ public:
   void updateSize(int width, int height) noexcept;
   void updateCursorPosition(double xpos, double ypos) noexcept;
   void setUseMouseForCamera(bool value) noexcept;
-  //void Window::setIcon(Image &&img) noexcept;
+  void setIcon(Image &&img) noexcept;
   void clear(Color color) noexcept;
   void draw() noexcept;
 

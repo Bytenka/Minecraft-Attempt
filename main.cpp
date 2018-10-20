@@ -3,10 +3,9 @@
 int main(int argc, char *argv[])
 {
     tk::Application &appli = tk::Application::getInstance();
-    appli.createWindow("Yaaaaa", 1280, 720);
-    appli.setWindowAsMain("Yaaaaa"); // @TODO Make a UID system for windows
-    appli.createWindow("2", 200, 200);
-    appli.createWindow("3", 300, 300);
+    unsigned mainWindow = appli.createWindow("Yaaaaa", 1280, 720);
+    appli.setWindowAsMain(mainWindow);
+    appli.setWindowIcon(mainWindow, "resources/icon.png");
 
     appli.startLoop();
     return 0;

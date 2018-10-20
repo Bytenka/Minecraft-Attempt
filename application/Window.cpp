@@ -46,7 +46,6 @@ Window::Window(unsigned width, unsigned height, std::string title)
     }
     catch (RuntimeException &e)
     {
-        e.pushCurrentContext(__FUNCTION__, "Window");
     }
 }
 
@@ -93,32 +92,30 @@ void Window::setUseMouseForCamera(bool value) noexcept
     }
 }
 
-/*
 void Window::setIcon(Image &&img) noexcept
 {
     try
     {
-	unsigned size = img.getWidth() * img.getHeight() * img.getNbrChannels();
-	GLFWimage glfwImage;
+        unsigned size = img.getWidth() * img.getHeight() * img.getNbrChannels();
+        GLFWimage glfwImage;
 
-	glfwImage.width = img.getWidth();
-	glfwImage.height = img.getHeight();
+        glfwImage.width = img.getWidth();
+        glfwImage.height = img.getHeight();
 
-	if (!img.getData())
-	{
-		throw RuntimeException(__FUNCTION__, "Image is not loaded!");
-	}
+        if (!img.getData())
+        {
+            throw RuntimeException(__FUNCTION__, "Image is not loaded!");
+        }
 
-	glfwImage.pixels = new unsigned char[size];
-	memcpy(glfwImage.pixels, img.getData(), size);
-	glfwSetWindowIcon(m_glfwWindow, 1, &glfwImage);
-	delete[] glfwImage.pixels;
+        glfwImage.pixels = new unsigned char[size];
+        memcpy(glfwImage.pixels, img.getData(), size);
+        glfwSetWindowIcon(m_glfwWindow, 1, &glfwImage);
+        delete[] glfwImage.pixels;
     }
-    catch(RuntimeException &e)
+    catch (RuntimeException &e)
     {
     }
 }
-*/
 
 void Window::clear(Color color) noexcept
 {

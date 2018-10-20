@@ -9,9 +9,7 @@ cflags = -I $(HOME)/Dropbox/OpenGL/Libraries/Includes/ -Wall -Wextra -O0 -g -c
 cppsrc = $(wildcard *.cpp) \
          $(wildcard application/*.cpp) \
          $(wildcard graphics/*.cpp) \
-         $(wildcard utils/*.cpp) \
-		 $(wildcard world/*.cpp) \
-         $(wildcard tests/*.cpp)
+         $(wildcard utils/*.cpp)
 
 csrc = utils/glad.c
 
