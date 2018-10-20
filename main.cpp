@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
         Window *w = appli.getInternalWindow(mainWindow);
         w->setIcon(Image("resources/icon.png"));
-        w->setUseMouseForCamera(false);
+        w->setUseMouseForCamera(true);
     }
 
     appli.startLoop();

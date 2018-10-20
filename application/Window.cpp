@@ -83,7 +83,7 @@ void Window::setUseMouseForCamera(bool value) noexcept
 
     if (value)
     {
-        glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        //glfwSetInputMode(m_glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         updateCursorPosition(m_width / 2.0, m_height / 2.0);
     }
     else
@@ -129,6 +129,7 @@ void Window::clear(Color color) noexcept
 
 void Window::draw() noexcept
 {
+    m_cursorTravel = glm::dvec2(0);
     glfwSwapBuffers(m_glfwWindow);
 }
 

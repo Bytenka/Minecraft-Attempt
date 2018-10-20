@@ -5,6 +5,7 @@
 
 #include "../graphics/ShaderManager.h"
 #include "../graphics/Image.h"
+#include "../graphics/Camera.h"
 
 namespace tk
 {
@@ -42,61 +43,93 @@ Application::~Application() noexcept
 
 void Application::startLoop()
 {
-    // @TODO Cleanup debugging stuff
-
-    GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f};
-
-    GLuint indices[] = {
-        0, 1, 2,
-        0, 2, 3};
-
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    GLuint vbo, ebo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    ShaderPtr mainShader = ShaderManager::getInstance().load("shaders/default.vert", "shaders/default.frag");
-    mainShader->enable();
-
-    bool appShouldTerminate = false;
-    while (!appShouldTerminate)
+    try
     {
-        for (int i = m_windows.size() - 1; i >= 0; i--)
+        // @TODO Cleanup debugging stuff
+
+        ///*
+        GLfloat vertices[] = {
+            -0.5f, -0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f,
+            0.5f, 0.5f, 0.0f,
+            -0.5f, 0.5f, 0.0f};
+
+        GLuint indices[] = {
+            0, 1, 2,
+            0, 2, 3};
+
+        GLuint vao;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        GLuint vbo, ebo;
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+        glGenBuffers(1, &ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
+        glEnableVertexAttribArray(0);
+        //*/
+
+        ShaderPtr mainShader = ShaderManager::getInstance().load("shaders/default3D.vert", "shaders/default3D.frag");
+        mainShader->setUniform1i("textu", 0);
+
+        Camera cam({0.0f, 0.0f, 1.0f});
+
+        // Getting the main window, if set, to apply matrices
+        if (m_mainWindowUID == 0)
+            throw RuntimeException(__FUNCTION__, "Main window is not set!");
+        else
         {
-            auto &currentPair = m_windows[i];
-            auto &w = currentPair.second;
-            w->setContextCurrent();
-            w->update();
-            w->clear({127, 127, 255});
-            // pull data to draw. This shall push to GL
+            Window *mainWindow = m_windows[getIndexOfWindow(m_mainWindowUID)].second.get();
 
-            glBindVertexArray(vao);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glm::mat4 model = glm::mat4(1.0f);
+            mainShader->setUniformMatrix4fv("modelMat", model);
 
-            w->draw();
+            glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)mainWindow->getWidth() / (float)mainWindow->getHeight(), 0.1f, 500.0f);
+            mainShader->setUniformMatrix4fv("projectionMat", projection);
 
-            if (w->shouldClose())
+            mainShader->enable();
+        }
+
+        bool appShouldTerminate = false;
+        while (!appShouldTerminate)
+        {
+            for (int i = m_windows.size() - 1; i >= 0; i--)
             {
-                if (currentPair.first == m_mainWindowUID)
-                    appShouldTerminate = true;
-                m_windows.erase(m_windows.begin() + i);
+                auto &currentPair = m_windows[i];
+                auto &w = currentPair.second;
+                w->setContextCurrent();
+                w->update();
+
+                glm::vec2 rot = w->getCursorTravel() * 0.1;
+                cam.rotate(rot.x, rot.y);
+                glm::mat4 view = cam.getView();
+                mainShader->setUniformMatrix4fv("viewMat", view);
+
+                w->clear({127, 127, 255});
+                // pull data to draw. This shall push to GL
+
+                glBindVertexArray(vao);
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                w->draw();
+
+                if (w->shouldClose())
+                {
+                    if (currentPair.first == m_mainWindowUID)
+                        appShouldTerminate = true;
+                    m_windows.erase(m_windows.begin() + i);
+                }
             }
         }
+    }
+    catch (RuntimeException &e)
+    {
+        e.pushCurrentContext(__FUNCTION__);
     }
 }
 

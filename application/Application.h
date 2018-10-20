@@ -38,7 +38,7 @@ public:
   void updateWindowCursorPosition(GLFWwindow *window, double xpos, double ypos) noexcept;
   Window *getInternalWindow(unsigned windowUID) noexcept;
 
-  inline void setWindowAsMain(unsigned windowUID) noexcept { m_mainWindowUID = windowUID; }
+  inline void setWindowAsMain(unsigned windowUID) noexcept { m_mainWindowUID = windowUID; };
 
 private:
   unsigned getIndexOfWindow(unsigned windowUID);
