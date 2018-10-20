@@ -3,7 +3,7 @@
 #include "../utils/Exceptions.h"
 #include "../utils/Logging.h"
 
-#include "../graphics/Shader.h"
+#include "../graphics/ShaderManager.h"
 #include "../graphics/Image.h"
 
 namespace tk
@@ -70,8 +70,8 @@ void Application::startLoop()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
     glEnableVertexAttribArray(0);
 
-    Shader mainShader("resources/shaders/default.vert", "resources/shaders/default.frag");
-    mainShader.enable();
+    ShaderPtr mainShader = ShaderManager::getInstance().load("shaders/default.vert", "shaders/default.frag");
+    mainShader->enable();
 
     bool appShouldTerminate = false;
     while (!appShouldTerminate)
@@ -144,11 +144,11 @@ void Application::updateWindowCursorPosition(GLFWwindow *window, double xpos, do
     }
 }
 
-void Application::setWindowIcon(unsigned windowUID, const std::string &iconPath)
+Window *Application::getInternalWindow(unsigned windowUID) noexcept
 {
     try
     {
-        m_windows[getIndexOfWindow(windowUID)].second->setIcon(Image(iconPath));
+        return m_windows[getIndexOfWindow(windowUID)].second.get();
     }
     catch (RuntimeException &e)
     {

@@ -54,7 +54,7 @@ private:
   GLFWwindow *m_glfwWindow;
   glm::dvec2 m_cursorTravel, m_cursorPos;
   unsigned m_width, m_height;
-  bool m_useMouseForCamera = false;
+  bool m_useMouseForCamera = true;
 
 private:
   Window(const Window &) = delete;

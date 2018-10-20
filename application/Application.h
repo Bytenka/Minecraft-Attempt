@@ -36,8 +36,7 @@ public:
   void destroyWindow(unsigned windowUID) noexcept;
   void updateWindowSize(GLFWwindow *window, int width, int height) noexcept;
   void updateWindowCursorPosition(GLFWwindow *window, double xpos, double ypos) noexcept;
-
-  void setWindowIcon(unsigned windowUID, const std::string &iconPath);
+  Window *getInternalWindow(unsigned windowUID) noexcept;
 
   inline void setWindowAsMain(unsigned windowUID) noexcept { m_mainWindowUID = windowUID; }
 
