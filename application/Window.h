@@ -39,6 +39,8 @@ public:
   inline unsigned getHeight() const noexcept { return m_height; }
   inline std::string getTitle() const noexcept { return m_title; }
   inline bool shouldClose() const noexcept { return glfwWindowShouldClose(m_glfwWindow); }
+  inline void requestClosing() noexcept { glfwSetWindowShouldClose(m_glfwWindow, true); }
+  inline bool isKeyPressed(int key) const noexcept { return (glfwGetKey(m_glfwWindow, key) == GLFW_PRESS); }
 
 protected:
   void close() noexcept;

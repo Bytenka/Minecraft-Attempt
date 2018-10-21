@@ -48,7 +48,7 @@ void Application::startLoop()
     try
     {
         // @TODO Cleanup debugging stuff
-        ///*
+        /*
         GLfloat vertices[] = {
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
@@ -74,7 +74,7 @@ void Application::startLoop()
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void *)0);
         glEnableVertexAttribArray(0);
-        //*/
+        */
 
         FPSCounter fps;
         fps.displayFPS = true;
@@ -91,8 +91,8 @@ void Application::startLoop()
                 w->update();
                 w->clear({127, 127, 255});
 
-                glBindVertexArray(vao);
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                //glBindVertexArray(vao);
+                //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
                 w->draw();
 

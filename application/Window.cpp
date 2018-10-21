@@ -70,7 +70,6 @@ void Window::updateCursorPosition(double xpos, double ypos) noexcept
     glm::dvec2 newPos = {xpos, ypos};
     m_cursorTravel = newPos - m_cursorPos;
 
-    //m_cursorPos = {m_width / 2.0, m_height / 2.0};
     m_cursorPos = newPos;
 }
 
@@ -126,7 +125,6 @@ void Window::clear(Color color) noexcept
 void Window::close() noexcept
 {
     glfwDestroyWindow(m_glfwWindow);
-    //m_glfwWindow = nullptr;
     LOG_INFO("Destroyed window \"" << m_title << "\"");
 }
 
