@@ -1,3 +1,7 @@
+/*
+	@TODO This needs to be fixed, or at least be correct..
+*/
+
 #pragma once
 
 #include <glm/glm.hpp>
@@ -18,11 +22,10 @@ class Camera
 	glm::mat4 getView() const;
 	void rotate(double pitch, double yaw);
 
-	inline const glm::dvec3 &getPosition() const { return m_position; }
-	inline const glm::dvec3 &getDirection() const { return m_direction; }
-	inline const glm::dvec3 &getForward() const { return m_forward; }
-	inline const glm::dvec3 &getLeft() const { return m_left; }
-	inline const glm::dvec3 &getUp() const { return m_up; }
+	inline glm::dvec3 getPosition() const { return m_position; }
+	inline glm::dvec3 getDirection() const { return m_forward; }
+	inline glm::dvec3 getLeft() const { return m_left; }
+	inline glm::dvec3 getUp() const { return m_up; }
 
 	//glm::vec3 forward;
 
@@ -31,7 +34,6 @@ class Camera
 
 	glm::dvec3 m_position;
 
-	glm::dvec3 m_direction;
 	glm::dvec3 m_forward;
 	glm::dvec3 m_left;
 	glm::dvec3 m_up;
