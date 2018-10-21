@@ -11,7 +11,7 @@ class Camera
   public:
 	Camera(
 		glm::dvec3 initialPos = glm::dvec3(0.0, 0.0, 0.0),
-		glm::dvec3 initialDir = glm::dvec3(0.0, 0.0, -1.0));
+		glm::dvec3 initialDir = glm::dvec3(0.0, 0.0, 1.0));
 	~Camera();
 
 	void move(glm::dvec3 direction);

@@ -190,7 +190,7 @@ void Shader::setUniform4f(const char *uniformName, float x, float y, float z, fl
 	glUniform4f(uniformLocation, x, y, z, w);
 }
 
-void Shader::setUniformMatrix4fv(const char *uniformName, glm::mat4 &transform) noexcept
+void Shader::setUniformMatrix4fv(const char *uniformName, const glm::mat4 &transform) noexcept
 {
 	enable();
 	GLint uniformLocation = getUniformLocation(uniformName);

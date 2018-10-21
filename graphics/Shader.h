@@ -13,7 +13,7 @@ namespace tk
 {
 class Shader
 {
-  public:
+public:
 	Shader(const std::string &vertexPath, const std::string &fragmentPath);
 	~Shader() noexcept;
 
@@ -22,7 +22,7 @@ class Shader
 	void setUniform2f(const char *uniformName, float x, float y) noexcept;
 	void setUniform3f(const char *uniformName, float x, float y, float z) noexcept;
 	void setUniform4f(const char *uniformName, float x, float y, float z, float w) noexcept;
-	void setUniformMatrix4fv(const char *uniformName, glm::mat4 &transform) noexcept;
+	void setUniformMatrix4fv(const char *uniformName, const glm::mat4 &transform) noexcept;
 	void createShader(); // Can be used for overwriting
 	void flushUniformCache() noexcept;
 
@@ -32,7 +32,7 @@ class Shader
 	inline void setVertexShader(std::string vertexPath) noexcept { m_vertPath = vertexPath; }
 	inline void setFragmentShader(std::string fragmentPath) noexcept { m_fragPath = fragmentPath; }
 
-  private:
+private:
 	void compile();
 	void createVertex();
 	void deleteVertex() noexcept;
@@ -50,7 +50,7 @@ class Shader
 
 	unsigned m_vertexShader, m_fragmentShader, m_shaderProgram;
 
-  private:
+private:
 	Shader(const Shader &) = delete;
 	void operator=(const Shader &) = delete;
 };

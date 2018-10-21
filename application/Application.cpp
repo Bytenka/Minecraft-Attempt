@@ -2,10 +2,12 @@
 
 #include "../utils/Exceptions.h"
 #include "../utils/Logging.h"
+#include "../utils/FPSCounter.h"
 
 #include "../graphics/ShaderManager.h"
 #include "../graphics/Image.h"
 #include "../graphics/Camera.h"
+#include "../graphics/RenderEngine.h"
 
 namespace tk
 {
@@ -46,7 +48,6 @@ void Application::startLoop()
     try
     {
         // @TODO Cleanup debugging stuff
-
         ///*
         GLfloat vertices[] = {
             -0.5f, -0.5f, 0.0f,
@@ -75,47 +76,24 @@ void Application::startLoop()
         glEnableVertexAttribArray(0);
         //*/
 
-        ShaderPtr mainShader = ShaderManager::getInstance().load("shaders/default3D.vert", "shaders/default3D.frag");
-        mainShader->setUniform1i("textu", 0);
-
-        Camera cam({0.0f, 0.0f, 1.0f});
-
-        // Getting the main window, if set, to apply matrices
-        if (m_mainWindowUID == 0)
-            throw RuntimeException(__FUNCTION__, "Main window is not set!");
-        else
-        {
-            Window *mainWindow = m_windows[getIndexOfWindow(m_mainWindowUID)].second.get();
-
-            glm::mat4 model = glm::mat4(1.0f);
-            mainShader->setUniformMatrix4fv("modelMat", model);
-
-            glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)mainWindow->getWidth() / (float)mainWindow->getHeight(), 0.1f, 500.0f);
-            mainShader->setUniformMatrix4fv("projectionMat", projection);
-
-            mainShader->enable();
-        }
+        FPSCounter fps;
+        fps.displayFPS = true;
 
         bool appShouldTerminate = false;
         while (!appShouldTerminate)
         {
+            fps.frameBegin();
             for (int i = m_windows.size() - 1; i >= 0; i--)
             {
                 auto &currentPair = m_windows[i];
                 auto &w = currentPair.second;
                 w->setContextCurrent();
                 w->update();
-
-                glm::vec2 rot = w->getCursorTravel() * 0.1;
-                cam.rotate(rot.x, rot.y);
-                glm::mat4 view = cam.getView();
-                mainShader->setUniformMatrix4fv("viewMat", view);
-
                 w->clear({127, 127, 255});
-                // pull data to draw. This shall push to GL
 
                 glBindVertexArray(vao);
                 glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
                 w->draw();
 
                 if (w->shouldClose())
@@ -125,6 +103,7 @@ void Application::startLoop()
                     m_windows.erase(m_windows.begin() + i);
                 }
             }
+            fps.frameEnd();
         }
     }
     catch (RuntimeException &e)
@@ -137,6 +116,14 @@ unsigned Application::createWindow(const std::string &title, unsigned width, uns
 {
     unsigned uid = m_windowsUIDCounter++;
     auto newWindow = std::make_pair(uid, std::make_unique<Window>(width, height, title));
+    m_windows.push_back(std::move(newWindow));
+    return uid;
+}
+
+unsigned Application::createRenderWindow(const std::string &title, unsigned width, unsigned height) noexcept
+{
+    unsigned uid = m_windowsUIDCounter++;
+    auto newWindow = std::make_pair(uid, std::make_unique<RenderWindow>(width, height, title));
     m_windows.push_back(std::move(newWindow));
     return uid;
 }
@@ -187,6 +174,20 @@ Window *Application::getInternalWindow(unsigned windowUID) noexcept
     {
         e.pushCurrentContext(__FUNCTION__);
     }
+    return nullptr;
+}
+
+Window *Application::getMainWindow() noexcept
+{
+    try
+    {
+        return m_windows[getIndexOfWindow(m_mainWindowUID)].second.get();
+    }
+    catch (RuntimeException &e)
+    {
+        e.pushCurrentContext(__FUNCTION__);
+    }
+    return nullptr;
 }
 
 // private:

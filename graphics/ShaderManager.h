@@ -2,7 +2,8 @@
 
 #define RESOURCES_PATH "resources/"
 
-#include "../graphics/Shader.h"
+#include "Shader.h"
+#include "../utils/Exceptions.h"
 
 #include <memory>
 #include <string>
@@ -20,20 +21,28 @@ struct ShaderManager
 		return instance;
 	}
 
-	ShaderPtr load(const std::string &vertexName, const std::string &fragmentName) noexcept
+	ShaderPtr load(const std::string &vertexName, const std::string &fragmentName)
 	{
-		std::pair<std::string, std::string> pair = std::make_pair(RESOURCES_PATH + vertexName, RESOURCES_PATH + fragmentName);
-
-		auto iterator = m_loadedShaders.find(pair);
-		if (iterator != m_loadedShaders.end())
+		try
 		{
-			return iterator->second;
+			std::pair<std::string, std::string> pair = std::make_pair(RESOURCES_PATH + vertexName, RESOURCES_PATH + fragmentName);
+
+			auto iterator = m_loadedShaders.find(pair);
+			if (iterator != m_loadedShaders.end())
+			{
+				return iterator->second;
+			}
+
+			ShaderPtr newShader = std::make_shared<Shader>(RESOURCES_PATH + vertexName, RESOURCES_PATH + fragmentName);
+			m_loadedShaders.insert(std::make_pair(pair, newShader));
+
+			return newShader;
 		}
-
-		ShaderPtr newShader = std::make_shared<Shader>(RESOURCES_PATH + vertexName, RESOURCES_PATH + fragmentName);
-		m_loadedShaders.insert(std::make_pair(pair, newShader));
-
-		return newShader;
+		catch (RuntimeException &e)
+		{
+			e.pushCurrentContext(__FUNCTION__);
+			throw;
+		}
 	}
 
 	inline void clearCache() noexcept { m_loadedShaders.clear(); }

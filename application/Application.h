@@ -12,6 +12,7 @@
 #pragma once
 
 #include "Window.h"
+#include "RenderWindow.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -33,10 +34,12 @@ public:
 
   void startLoop();
   unsigned createWindow(const std::string &title, unsigned width, unsigned height) noexcept;
+  unsigned createRenderWindow(const std::string &title, unsigned width, unsigned height) noexcept;
   void destroyWindow(unsigned windowUID) noexcept;
   void updateWindowSize(GLFWwindow *window, int width, int height) noexcept;
   void updateWindowCursorPosition(GLFWwindow *window, double xpos, double ypos) noexcept;
   Window *getInternalWindow(unsigned windowUID) noexcept;
+  Window *getMainWindow() noexcept;
 
   inline void setWindowAsMain(unsigned windowUID) noexcept { m_mainWindowUID = windowUID; };
 

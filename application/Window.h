@@ -22,15 +22,15 @@ class Window
 {
 public:
   Window(unsigned width, unsigned height, std::string title);
-  ~Window();
+  virtual ~Window();
 
-  void setContextCurrent() noexcept;
+  virtual void update() noexcept;
+  virtual void draw() noexcept;
+  virtual void updateCursorPosition(double xpos, double ypos) noexcept;
   void updateSize(int width, int height) noexcept;
-  void updateCursorPosition(double xpos, double ypos) noexcept;
-  void setUseMouseForCamera(bool value) noexcept;
+  void setContextCurrent() noexcept;
   void setIcon(Image &&img) noexcept;
   void clear(Color color) noexcept;
-  void draw() noexcept;
 
   inline const GLFWwindow *getGLFWWindow() const noexcept { return m_glfwWindow; }
   inline glm::dvec2 getCursorPos() const noexcept { return m_cursorPos; }
@@ -40,23 +40,16 @@ public:
   inline std::string getTitle() const noexcept { return m_title; }
   inline bool shouldClose() const noexcept { return glfwWindowShouldClose(m_glfwWindow); }
 
-  //inline void attachRenderEngine(RenderEngine &engine) noexcept { m_renderEngine = &engine; }
-  //inline void detachRenderEngine() noexcept { m_renderEngine = nullptr; }
-
-  void update();
-  void refresh();
-
-private:
+protected:
   void close() noexcept;
 
-private:
+protected:
   std::string m_title;
   GLFWwindow *m_glfwWindow;
   glm::dvec2 m_cursorTravel, m_cursorPos;
   unsigned m_width, m_height;
-  bool m_useMouseForCamera = true;
 
-private:
+protected:
   Window(const Window &) = delete;
   void operator=(const Window &) = delete;
 };
