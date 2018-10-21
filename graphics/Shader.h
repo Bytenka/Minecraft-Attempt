@@ -13,9 +13,9 @@ namespace tk
 {
 class Shader
 {
-public:
+  public:
 	Shader(const std::string &vertexPath, const std::string &fragmentPath);
-	~Shader() noexcept;
+	~Shader();
 
 	void setUniform1i(const char *uniformName, int i) noexcept;
 	void setUniform1f(const char *uniformName, float f) noexcept;
@@ -32,7 +32,7 @@ public:
 	inline void setVertexShader(std::string vertexPath) noexcept { m_vertPath = vertexPath; }
 	inline void setFragmentShader(std::string fragmentPath) noexcept { m_fragPath = fragmentPath; }
 
-private:
+  private:
 	void compile();
 	void createVertex();
 	void deleteVertex() noexcept;
@@ -50,7 +50,7 @@ private:
 
 	unsigned m_vertexShader, m_fragmentShader, m_shaderProgram;
 
-private:
+  private:
 	Shader(const Shader &) = delete;
 	void operator=(const Shader &) = delete;
 };
