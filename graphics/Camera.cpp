@@ -26,7 +26,7 @@ void Camera::updateTransform()
 {
 }
 
-void Camera::rotate(double yaw, double pitch)
+void Camera::rotate(double pitch, double yaw)
 {
 	m_yaw += yaw;
 	m_pitch -= pitch;
