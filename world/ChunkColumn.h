@@ -1,11 +1,10 @@
-#include "Chunk.h"
-#include "Block.h"
-
-#include <glm/glm.hpp>
-
 #pragma once
 
+#include "Chunk.h"
+#include "Block.h"
 #include "WorldConstants.h"
+
+#include <glm/glm.hpp>
 
 #include <array>
 
@@ -14,21 +13,24 @@ namespace tk
 class ChunkColumn
 {
 public:
-  ChunkColumn(const glm::ivec2 &position) noexcept;
-  ~ChunkColumn() noexcept;
+  ChunkColumn();
+  ~ChunkColumn();
 
-  inline glm::ivec2 getPosition() const noexcept { return m_position; };
-  inline glm::ivec2 getPositionInBlocks() const noexcept { return m_position * CHUNK_SIZE; };
-  Chunk *getChunkAtIndex(int index) noexcept;
-  void generateTerrain();
+  Chunk *getChunkAtIndex(unsigned index);
   void buildMeshes();
-  void buildMeshOfChunkAt(int index);
+  void buildMeshOfChunkAt(unsigned index);
   void flagMeshUpdate() noexcept;
-  void draw(); // @TODO temp, need renderer
+  void generateTerrain();
+
+  //inline glm::ivec2 getPosition() const noexcept { return m_position; };
+  //inline glm::ivec2 getPositionInBlocks() const noexcept { return m_position * CHUNK_SIZE; };
 
 public:
+  // These are duplicate information used to build the meshes of the chunk. The superclass World should keep
+  // them up to date.
   std::array<ChunkColumn *, 4> neighboors; // Fill to null at creation, should be updated by world
                                            // Left, Right, Front, Back
+  glm::ivec2 position;
 
 private:
   void fillBlockColumnAtWith(const glm::ivec3 &bottomLocalPos, unsigned top, const Block &block);
@@ -36,6 +38,5 @@ private:
 
 private:
   std::array<Chunk, CHUNK_COL_HEIGHT> m_chunks;
-  glm::ivec2 m_position;
 };
 } // namespace tk

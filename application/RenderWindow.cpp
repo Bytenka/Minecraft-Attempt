@@ -6,9 +6,10 @@
 namespace tk
 {
 RenderWindow::RenderWindow(unsigned width, unsigned height, std::string title)
-    : Window::Window(width, height, title), m_camera({0.0f, 0.0f, 0.0f}), m_renderEngine(this)
+    : Window::Window(width, height, title), m_camera({0.0f, 257.0f, 0.0f}), m_renderEngine(this)
 {
     LOG_INFO("Created renderwindow!");
+    m_camera.rotate(0, -90); // @TODO Debug stuff, to remove
 }
 
 RenderWindow::~RenderWindow()

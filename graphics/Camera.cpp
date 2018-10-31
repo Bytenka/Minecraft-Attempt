@@ -31,11 +31,11 @@ void Camera::rotate(double pitch, double yaw)
 	m_yaw += yaw;
 	m_pitch -= pitch;
 
-	if (m_pitch < -90.0)
-		m_pitch = -90.0;
+	if (m_pitch < -89.9999)
+		m_pitch = -89.9999;
 
-	if (m_pitch > 90.0)
-		m_pitch = 90.0;
+	if (m_pitch > 89.9999)
+		m_pitch = 89.9999;
 
 	if (m_yaw > 180.0)
 		m_yaw -= 360.0;

@@ -7,10 +7,15 @@
 #include <glm/matrix.hpp>
 
 #include "../world/Chunk.h"
+#include "../world/World.h"
+#include "WorldRenderer.h"
 
 namespace tk
 {
-Chunk chunk;
+Chunk chunk1;
+Chunk chunk2;
+World world;
+WorldRenderer wr;
 
 RenderEngine::RenderEngine(RenderWindow *targetWindow)
     : m_targetWindow(targetWindow)
@@ -21,11 +26,8 @@ RenderEngine::RenderEngine(RenderWindow *targetWindow)
         m_mainShader->setUniform1i("textu", 0);
         computeMatrices();
         m_mainShader->enable();
-
-        // Don't forget to change the _air to _opaque when removing this
-        chunk.fillWith(Blocks::grass);
-        chunk.generateMesh({0, 0, 0}, {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr});
     }
+
     catch (RuntimeException &e)
     {
         e.pushCurrentContext(__FUNCTION__);
@@ -49,25 +51,34 @@ void RenderEngine::computeMatrices()
 }
 
 void poolKeys(tk::Window *w, tk::Camera &cam);
+
 void RenderEngine::drawNewFrame(Camera &camera)
 {
-    glm::vec2 rot = m_targetWindow->getCursorTravel() * 0.1;
-    camera.rotate(rot.x, rot.y);
-    m_mainShader->setUniformMatrix4fv("viewMat", camera.getView());
+    try
+    {
+        glm::vec2 rot = m_targetWindow->getCursorTravel() * 0.1;
+        camera.rotate(rot.y, rot.x);
+        m_mainShader->setUniformMatrix4fv("viewMat", camera.getView());
 
-    poolKeys(m_targetWindow, camera);
+        poolKeys(m_targetWindow, camera);
 
-    glBindVertexArray(chunk.getMesh().getVAO());
-    glDrawElements(GL_TRIANGLES, chunk.getMesh().getVerticesCount(), GL_UNSIGNED_INT, 0);
+        world.update(camera.getPosition());
+        wr.drawWorld(world);
+    }
+    catch (RuntimeException &e)
+    {
+        e.pushCurrentContext(__FUNCTION__);
+    }
 }
 
 // private:
 
 // @TODO Cleanup
+double deltaFactor = 1;
+double speed = 0.08;
+
 void poolKeys(tk::Window *w, tk::Camera &cam)
 {
-    double deltaFactor = 1;
-    double speed = 0.2;
 
     if (w->isKeyPressed(GLFW_KEY_W))
     {
@@ -105,10 +116,12 @@ void poolKeys(tk::Window *w, tk::Camera &cam)
     }
     if (w->isKeyPressed(GLFW_KEY_P))
     {
+        speed *= 1.01;
     }
 
     if (w->isKeyPressed(GLFW_KEY_O))
     {
+        speed *= 0.99;
     }
 }
 } // namespace tk
