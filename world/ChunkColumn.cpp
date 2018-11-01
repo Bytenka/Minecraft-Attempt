@@ -29,13 +29,13 @@ Chunk *ChunkColumn::getChunkAtIndex(unsigned index)
     return &m_chunks[index];
 }
 
-void ChunkColumn::buildMeshes()
+void ChunkColumn::generateMeshes()
 {
     try
     {
         for (int i = m_chunks.size() - 1; i >= 0; i--)
         {
-            buildMeshOfChunkAt(i);
+            generateMeshOfChunkAt(i);
         }
     }
     catch (RuntimeException &e)
@@ -45,7 +45,7 @@ void ChunkColumn::buildMeshes()
     }
 }
 
-void ChunkColumn::buildMeshOfChunkAt(unsigned index)
+void ChunkColumn::generateMeshOfChunkAt(unsigned index)
 {
     if (index >= CHUNK_COL_HEIGHT)
     {
@@ -79,12 +79,14 @@ void ChunkColumn::buildMeshOfChunkAt(unsigned index)
     }
 }
 
-void ChunkColumn::flagMeshUpdate() noexcept
+void ChunkColumn::updateMeshes()
 {
-    for (unsigned i = 0; i < m_chunks.size(); i++)
+    for (auto &current : m_chunks)
     {
-        m_chunks[i].getMesh().setDirty(true);
+        current.touchMesh();
     }
+
+    generateMeshes();
 }
 
 void ChunkColumn::generateTerrain()

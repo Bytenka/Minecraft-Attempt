@@ -117,25 +117,24 @@ bool World::poolToLoadColumns() noexcept
 
         newLoadedColumn.second->generateTerrain();
 
-        newLoadedColumn.second->flagMeshUpdate();
-
-        // AAAAA @TODO Remove that
+        // AAAAA @TODO Remove that mess
         glm::ivec2 cachePos = newLoadedColumn.second->position;
-        ChunkColumn *c = getChunkColumn({cachePos.x + 1, cachePos.y}).get();
-        if (c)
-            c->flagMeshUpdate();
-        c = getChunkColumn({cachePos.x - 1, cachePos.y}).get();
-        if (c)
-            c->flagMeshUpdate();
-        c = getChunkColumn({cachePos.x, cachePos.y + 1}).get();
-        if (c)
-            c->flagMeshUpdate();
-        c = getChunkColumn({cachePos.x, cachePos.y - 1}).get();
-        if (c)
-            c->flagMeshUpdate();
-
         m_loadedColumns.push_back(std::move(newLoadedColumn));
         setNeighboorsOfColumn(m_loadedColumns.size() - 1, true); // Index is the last added
+        m_loadedColumns[m_loadedColumns.size() - 1].second->generateMeshes();
+
+        ChunkColumn *c = getChunkColumn({cachePos.x + 1, cachePos.y}).get();
+        if (c)
+            c->updateMeshes();
+        c = getChunkColumn({cachePos.x - 1, cachePos.y}).get();
+        if (c)
+            c->updateMeshes();
+        c = getChunkColumn({cachePos.x, cachePos.y + 1}).get();
+        if (c)
+            c->updateMeshes();
+        c = getChunkColumn({cachePos.x, cachePos.y - 1}).get();
+        if (c)
+            c->updateMeshes();
 
         return true;
     }

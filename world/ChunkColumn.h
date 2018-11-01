@@ -17,9 +17,9 @@ public:
   ~ChunkColumn();
 
   Chunk *getChunkAtIndex(unsigned index);
-  void buildMeshes();
-  void buildMeshOfChunkAt(unsigned index);
-  void flagMeshUpdate() noexcept;
+  void generateMeshes();
+  void generateMeshOfChunkAt(unsigned index);
+  void updateMeshes();
   void generateTerrain();
 
   //inline glm::ivec2 getPosition() const noexcept { return m_position; };

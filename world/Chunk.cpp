@@ -36,7 +36,7 @@ void Chunk::setBlockAt(const glm::ivec3 &localPosition, const Block &block)
 		if (&block != &Blocks::_air)
 			m_isAir = false;
 
-		m_mesh.setDirty(true);
+		m_isMeshDirty = true;
 	}
 }
 
@@ -56,7 +56,7 @@ void Chunk::fillWith(const Block &block) noexcept
 {
 	m_blocks.fill(&block);
 	m_isAir = &block == &Blocks::_air ? true : false;
-	m_mesh.setDirty(true);
+	m_isMeshDirty = true;
 }
 
 void Chunk::fillLayerWith(unsigned layer, const Block &block)
@@ -74,7 +74,7 @@ void Chunk::fillLayerWith(unsigned layer, const Block &block)
 
 	if (&block != &Blocks::_air)
 		m_isAir = false;
-	m_mesh.setDirty(true);
+	m_isMeshDirty = true;
 }
 
 void Chunk::fillColumnWith(const glm::ivec2 &localPosition, const Block &block)
@@ -109,19 +109,19 @@ void Chunk::fillColumnFromToWith(const glm::ivec2 &localPosition, unsigned fromH
 
 	if (&block != &Blocks::_air)
 		m_isAir = false;
-	m_mesh.setDirty(true);
+	m_isMeshDirty = true;
 }
 
 void Chunk::generateMesh(const glm::ivec3 &chunkPosition, const std::array<Chunk *, 6> &neighboorChunks)
 {
 	try
 	{
-		if (!m_mesh.isDirty())
+		if (!m_isMeshDirty)
 		{
 			LOG_WARN("Regenerating an already up to date mesh!");
 		}
 
-		LOG_INFO("Building mesh for chunk (" << chunkPosition.x << ", " << chunkPosition.y << ", " << chunkPosition.z << ")...");
+		LOG_INFO("Generating mesh for chunk (" << chunkPosition.x << ", " << chunkPosition.y << ", " << chunkPosition.z << ")...");
 		double time = glfwGetTime();
 		m_mesh.clear();
 
@@ -155,7 +155,7 @@ void Chunk::generateMesh(const glm::ivec3 &chunkPosition, const std::array<Chunk
 					}
 		}
 
-		m_mesh.build();
+		m_isMeshDirty = false;
 		LOG_INFO("Finished in " << (glfwGetTime() - time) * 1000 << "ms");
 	}
 	catch (RuntimeException &e)
@@ -202,7 +202,7 @@ const Block *Chunk::getBlockAtWithNeighboors(const glm::ivec3 &position, const s
 		throw;
 	}
 
-	throw RuntimeException(__FUNCTION__, "Impossible case error: can't evaluate block position!");
+	throw RuntimeException(__FUNCTION__, "Impossible error: can't evaluate block position!");
 }
 
 } // namespace tk

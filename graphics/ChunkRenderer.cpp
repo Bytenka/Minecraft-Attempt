@@ -17,7 +17,15 @@ void ChunkRenderer::drawChunk(Chunk &chunk)
 {
     ChunkMesh &mesh = chunk.getMesh();
 
-    glBindVertexArray(mesh.getVAO());
-    glDrawElements(GL_TRIANGLES, mesh.getVerticesCount(), GL_UNSIGNED_INT, (void *)0);
+    if (mesh.isGLDirty())
+    {
+        mesh.buildGL();
+    }
+
+    if (!mesh.isEmpty())
+    {
+        glBindVertexArray(mesh.getVAO());
+        glDrawElements(GL_TRIANGLES, mesh.getVerticesCount(), GL_UNSIGNED_INT, (void *)0);
+    }
 }
 } // namespace tk
