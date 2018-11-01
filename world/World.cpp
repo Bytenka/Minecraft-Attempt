@@ -41,14 +41,14 @@ void World::update(const glm::dvec3 &playerPosition)
     */
 }
 
-std::vector<ChunkColumn *> World::getDrawableContent() noexcept
+std::vector<std::shared_ptr<ChunkColumn>> World::getDrawableContent() noexcept
 {
-    std::vector<ChunkColumn *> toReturn;
+    std::vector<std::shared_ptr<ChunkColumn>> toReturn;
     toReturn.reserve(m_loadedColumns.size() + 1); // +1 is technically useless
 
     for (auto &current : m_loadedColumns)
     {
-        toReturn.push_back(&(current->second));
+        toReturn.push_back(current.second);
     }
 
     return toReturn;
@@ -83,7 +83,7 @@ bool World::detectToUnloadColumns(const glm::dvec3 &playerPosition) noexcept
     bool asUnloadedSomething = false;
     for (int i = m_loadedColumns.size() - 1; i >= 0; i--)
     {
-        auto &current = *(m_loadedColumns[i]);
+        auto &current = m_loadedColumns[i];
         if (glm::distance(glm::vec2(posInChunks), glm::vec2(current.first)) + 1 > PLAYER_VIEW_DISTANCE)
         {
             setNeighboorsOfColumn(i, false);
@@ -112,25 +112,25 @@ bool World::poolToLoadColumns() noexcept
         glm::ivec2 current = m_toLoadColumns.back();
         m_toLoadColumns.pop_back();
 
-        auto newLoadedColumn = std::make_shared<std::pair<glm::ivec2, ChunkColumn>>(std::make_pair(current, ChunkColumn()));
-        newLoadedColumn->second.position = current;
+        auto newLoadedColumn = std::make_pair(current, std::make_shared<ChunkColumn>());
+        newLoadedColumn.second->position = current;
 
-        newLoadedColumn->second.generateTerrain();
+        newLoadedColumn.second->generateTerrain();
 
-        newLoadedColumn->second.flagMeshUpdate();
+        newLoadedColumn.second->flagMeshUpdate();
 
         // AAAAA @TODO Remove that
-        glm::ivec2 cachePos = newLoadedColumn->second.position;
-        ChunkColumn *c = getChunkColumn({cachePos.x + 1, cachePos.y});
+        glm::ivec2 cachePos = newLoadedColumn.second->position;
+        ChunkColumn *c = getChunkColumn({cachePos.x + 1, cachePos.y}).get();
         if (c)
             c->flagMeshUpdate();
-        c = getChunkColumn({cachePos.x - 1, cachePos.y});
+        c = getChunkColumn({cachePos.x - 1, cachePos.y}).get();
         if (c)
             c->flagMeshUpdate();
-        c = getChunkColumn({cachePos.x, cachePos.y + 1});
+        c = getChunkColumn({cachePos.x, cachePos.y + 1}).get();
         if (c)
             c->flagMeshUpdate();
-        c = getChunkColumn({cachePos.x, cachePos.y - 1});
+        c = getChunkColumn({cachePos.x, cachePos.y - 1}).get();
         if (c)
             c->flagMeshUpdate();
 
@@ -143,16 +143,16 @@ bool World::poolToLoadColumns() noexcept
     return false;
 }
 
-ChunkColumn *World::getChunkColumn(const glm::ivec2 &position) noexcept
+std::shared_ptr<ChunkColumn> World::getChunkColumn(const glm::ivec2 &position) noexcept
 {
     auto it = std::find_if(
         m_loadedColumns.begin(),
         m_loadedColumns.end(),
-        [&](const std::shared_ptr<std::pair<glm::ivec2, ChunkColumn>> &element) { return element->first == position; });
+        [&](const std::pair<glm::ivec2, std::shared_ptr<ChunkColumn>> &element) { return element.first == position; });
 
     if (it != m_loadedColumns.end())
     {
-        return &((*it)->second);
+        return it->second;
     }
     else
     {
@@ -187,14 +187,14 @@ bool World::canColumnBeLoaded(const glm::ivec2 &columnPos) noexcept
 
 void World::setNeighboorsOfColumn(unsigned indexOfColumn, bool setAsPresent) noexcept
 {
-    auto &column = m_loadedColumns[indexOfColumn]->second;
+    auto &column = m_loadedColumns[indexOfColumn].second;
 
-    ChunkColumn *atLeft = getChunkColumn({column.position.x - 1, column.position.y});
-    ChunkColumn *atRight = getChunkColumn({column.position.x + 1, column.position.y});
-    ChunkColumn *atFront = getChunkColumn({column.position.x, column.position.y + 1});
-    ChunkColumn *atBack = getChunkColumn({column.position.x, column.position.y - 1});
+    ChunkColumn *atLeft = getChunkColumn({column->position.x - 1, column->position.y}).get();
+    ChunkColumn *atRight = getChunkColumn({column->position.x + 1, column->position.y}).get();
+    ChunkColumn *atFront = getChunkColumn({column->position.x, column->position.y + 1}).get();
+    ChunkColumn *atBack = getChunkColumn({column->position.x, column->position.y - 1}).get();
 
-    ChunkColumn *valueToSet = setAsPresent == true ? &column : nullptr;
+    ChunkColumn *valueToSet = setAsPresent == true ? column.get() : nullptr;
 
     // Notifiy neighboors columns that this column exists
     if (atLeft)
@@ -209,10 +209,10 @@ void World::setNeighboorsOfColumn(unsigned indexOfColumn, bool setAsPresent) noe
     // Set this column neighboors
     if (setAsPresent)
     {
-        column.neighboors[0] = atLeft;
-        column.neighboors[1] = atRight;
-        column.neighboors[2] = atFront;
-        column.neighboors[3] = atBack;
+        column->neighboors[0] = atLeft;
+        column->neighboors[1] = atRight;
+        column->neighboors[2] = atFront;
+        column->neighboors[3] = atBack;
     }
 }
 
