@@ -73,6 +73,8 @@ void ChunkMesh::addFace(BlockSide face, const Block &block, const glm::ivec3 &ch
 		 m_indexOffset + 3});
 
 	m_indexOffset += 4;
+	m_isGLDirty = true;
+	m_isEmpty = false;
 }
 
 // private:
@@ -81,11 +83,7 @@ void ChunkMesh::pushToGL() noexcept
 {
 	deleteFromGL();
 
-	if (m_indices.size() == 0)
-	{
-		m_isEmpty = true;
-	}
-	else
+	if (!m_isEmpty)
 	{
 		glGenVertexArrays(1, &m_VAO);
 		glGenBuffers(1, &m_VBOvext);
@@ -106,10 +104,8 @@ void ChunkMesh::pushToGL() noexcept
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * m_indices.size(), m_indices.data(), GL_STATIC_DRAW);
-
-		m_isEmpty = false;
 	}
-	m_isDirty = false;
+	m_isGLDirty = false;
 }
 
 void ChunkMesh::deleteFromGL() noexcept
