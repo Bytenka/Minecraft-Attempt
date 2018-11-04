@@ -121,7 +121,7 @@ void Chunk::generateMesh(const glm::ivec3 &chunkPosition, const std::array<Chunk
 			LOG_WARN("Regenerating an already up to date mesh!");
 		}
 
-		LOG_INFO("Generating mesh for chunk (" << chunkPosition.x << ", " << chunkPosition.y << ", " << chunkPosition.z << ")...");
+		//LOG_INFO("Generating mesh for chunk (" << chunkPosition.x << ", " << chunkPosition.y << ", " << chunkPosition.z << ")...");
 		double time = glfwGetTime();
 		m_mesh.clear();
 
@@ -156,7 +156,7 @@ void Chunk::generateMesh(const glm::ivec3 &chunkPosition, const std::array<Chunk
 		}
 
 		m_isMeshDirty = false;
-		LOG_INFO("Finished in " << (glfwGetTime() - time) * 1000 << "ms");
+		//LOG_INFO("Finished in " << (glfwGetTime() - time) * 1000 << "ms");
 	}
 	catch (RuntimeException &e)
 	{

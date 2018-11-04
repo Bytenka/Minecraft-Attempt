@@ -1,33 +1,41 @@
 #include "World.h"
 #include "../utils/Exceptions.h"
+#include "../utils/Logging.h"
 
 #include <algorithm>
+#include <thread>
 
 namespace tk
 {
 World::World()
 {
-    /*
-    for (int x = -PLAYER_VIEW_DISTANCE / 2; x <= PLAYER_VIEW_DISTANCE / 2; x++)
-        for (int z = -PLAYER_VIEW_DISTANCE / 2; z <= PLAYER_VIEW_DISTANCE / 2; z++)
-        {
-            m_toLoadColumns.push_back({x, z});
-        }
-    */
 }
 
 World::~World()
 {
 }
 
+void World::updateLoop(World &world, const glm::dvec3 &playerPos, bool &shouldStop)
+{
+    while (!shouldStop)
+    {
+        world.update(playerPos);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+}
+
 void World::update(const glm::dvec3 &playerPosition)
 {
-    /*
-    This function is meant to be called at every frame.
-*/
-    poolToLoadColumns();
     detectToLoadColumns(playerPosition);
     detectToUnloadColumns(playerPosition);
+    poolToLoadColumns();
+    //poolToUnloadColumns();
+
+    m_dcmutex.lock();
+
+    updateDrawableCache();
+
+    m_dcmutex.unlock();
 
     /*
     int sqAround = PLAYER_VIEW_DISTANCE / 2;
@@ -43,14 +51,11 @@ void World::update(const glm::dvec3 &playerPosition)
 
 std::vector<std::shared_ptr<ChunkColumn>> World::getDrawableContent() noexcept
 {
-    std::vector<std::shared_ptr<ChunkColumn>> toReturn;
-    toReturn.reserve(m_loadedColumns.size() + 1); // +1 is technically useless
+    m_dcmutex.lock();
 
-    for (auto &current : m_loadedColumns)
-    {
-        toReturn.push_back(current.second);
-    }
+    std::vector<std::shared_ptr<ChunkColumn>> toReturn(m_drawableColumns);
 
+    m_dcmutex.unlock();
     return toReturn;
 }
 
@@ -62,6 +67,41 @@ bool World::detectToLoadColumns(const glm::dvec3 &playerPosition) noexcept
     glm::ivec2 posInChunks = {playerPosition.x / CHUNK_SIZE, playerPosition.z / CHUNK_SIZE};
 
     bool asLoadedSomething = false;
+
+    /*
+    auto attemptLoading = [&](const glm::ivec2 &localDesired) -> void {
+        glm::ivec3 globalDesired = {localDesired.x + posInChunks.x, localDesired.y, posInChunks.y};
+
+        if (canColumnBeLoaded(globalDesired))
+        {
+            m_toLoadColumns.push_back(globalDesired);
+            asLoadedSomething = true;
+        }
+    };
+    // Columns to load are pooled from the back so we must test things backwards
+    /// Circles around the player
+    for (int c = sqAroundPl - 1; c >= 0; c--)
+    {
+        // Front & back
+        for (int i = sqAroundPl - 1; i >= 0; i--)
+        {
+            attemptLoading({i, c});   // Front to left
+            attemptLoading({-i, c});  // Front to right
+            attemptLoading({i, -c});  // Back to left
+            attemptLoading({-i, -c}); // Back to right
+        }
+
+        // Left & Right
+        for (int i = sqAroundPl - 1; i >= 0; i--)
+        {
+            attemptLoading({-c, i});  // Left to front
+            attemptLoading({-c, -i}); // Left to back
+            attemptLoading({c, i});   // Right to front
+            attemptLoading({c, -i});  // Right to back
+        }
+    }
+    */
+
     for (int x = posInChunks.x - sqAroundPl; x < posInChunks.x + sqAroundPl; x++)
         for (int z = posInChunks.y - sqAroundPl; z < posInChunks.y + sqAroundPl; z++)
         {
@@ -110,6 +150,7 @@ bool World::poolToLoadColumns() noexcept
     if (!m_toLoadColumns.empty())
     {
         glm::ivec2 current = m_toLoadColumns.back();
+        LOG_INFO("Column: (" << current.x << ", " << current.y << ")");
         m_toLoadColumns.pop_back();
 
         auto newLoadedColumn = std::make_pair(current, std::make_shared<ChunkColumn>());
@@ -212,6 +253,15 @@ void World::setNeighboorsOfColumn(unsigned indexOfColumn, bool setAsPresent) noe
         column->neighboors[1] = atRight;
         column->neighboors[2] = atFront;
         column->neighboors[3] = atBack;
+    }
+}
+
+void World::updateDrawableCache() noexcept
+{
+    m_drawableColumns.clear();
+    for (auto &c : m_loadedColumns)
+    {
+        m_drawableColumns.push_back(c.second);
     }
 }
 

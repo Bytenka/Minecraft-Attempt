@@ -6,17 +6,8 @@
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
 
-#include "../world/Chunk.h"
-#include "../world/World.h"
-#include "WorldRenderer.h"
-
 namespace tk
 {
-Chunk chunk1;
-Chunk chunk2;
-World world;
-WorldRenderer wr;
-
 RenderEngine::RenderEngine(RenderWindow *targetWindow)
     : m_targetWindow(targetWindow)
 {
@@ -52,7 +43,7 @@ void RenderEngine::computeMatrices()
 
 void poolKeys(tk::Window *w, tk::Camera &cam);
 
-void RenderEngine::drawNewFrame(Camera &camera)
+void RenderEngine::drawNewFrame(World &world, Camera &camera)
 {
     try
     {
@@ -62,8 +53,7 @@ void RenderEngine::drawNewFrame(Camera &camera)
 
         poolKeys(m_targetWindow, camera);
 
-        world.update(camera.getPosition());
-        wr.drawWorld(world);
+        m_worldRenderer.drawWorld(world);
     }
     catch (RuntimeException &e)
     {

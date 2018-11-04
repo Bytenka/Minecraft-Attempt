@@ -15,9 +15,10 @@ public:
   virtual ~RenderWindow();
 
   virtual void update() noexcept;
-  virtual void draw() noexcept;
   virtual void updateCursorPosition(double xpos, double ypos) noexcept;
+  void drawWithWorld(World &world) noexcept;
   void setUseMouseForCamera(bool value) noexcept;
+  inline const Camera &getCamera() const { return m_camera; }
 
 private:
   Camera m_camera;

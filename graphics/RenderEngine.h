@@ -2,6 +2,8 @@
 
 #include "ShaderManager.h"
 #include "Camera.h"
+#include "../world/World.h"
+#include "WorldRenderer.h"
 
 namespace tk
 {
@@ -13,11 +15,11 @@ public:
   RenderEngine(RenderWindow *targetWindow);
   ~RenderEngine();
 
-  void drawNewFrame(Camera &camera);
+  void drawNewFrame(World &world, Camera &camera);
   void computeMatrices();
 
 private:
-  // ChunkRenderer
+  WorldRenderer m_worldRenderer;
   ShaderPtr m_mainShader;
   RenderWindow *m_targetWindow;
 };

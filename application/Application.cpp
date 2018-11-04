@@ -6,6 +6,9 @@
 #include "../utils/FPSCounter.h"
 
 #include "../graphics/TextureAtlas.h"
+#include "../world/World.h"
+
+#include <thread>
 
 namespace tk
 {
@@ -81,6 +84,12 @@ void Application::startLoop()
         TextureAtlas::getInstance().init();
         LOG_DEBUG1("OK!");
 
+        // Starts updating a world
+        World world;
+        bool worldThreadShouldStop = false;
+        glm::dvec3 playerPos(0); // @TODO Remove when Player is implemented
+        std::thread worldUpdater(World::updateLoop, std::ref(world), std::ref(playerPos), std::ref(worldThreadShouldStop));
+
         bool appShouldTerminate = false;
         while (!appShouldTerminate)
         {
@@ -96,17 +105,34 @@ void Application::startLoop()
                 //glBindVertexArray(vao);
                 //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-                w->draw();
+                if (RenderWindow *testW = dynamic_cast<RenderWindow *>(w.get()))
+                {
+                    testW->drawWithWorld(world);
+                    playerPos = testW->getCamera().getPosition();
+                }
+                else
+                {
+                    w->draw();
+                }
 
                 if (w->shouldClose())
                 {
                     if (currentPair.first == m_mainWindowUID)
+                    {
                         appShouldTerminate = true;
-                    m_windows.erase(m_windows.begin() + i);
+                    }
+                    else
+                    {
+                        m_windows.erase(m_windows.begin() + i);
+                    }
                 }
             }
             fps.frameEnd();
         }
+
+        worldThreadShouldStop = true;
+        worldUpdater.join();
+        m_windows.clear();
     }
     catch (RuntimeException &e)
     {
