@@ -1,6 +1,7 @@
 #include "ChunkMesh.h"
 #include "WorldConstants.h"
 #include "../graphics/TextureAtlas.h"
+#include "../utils/Exceptions.h"
 
 namespace tk
 {
@@ -48,33 +49,41 @@ const std::array<std::array<GLfloat, 12>, 6> faces = {
 
 // public:
 
-void ChunkMesh::addFace(BlockSide face, const Block &block, const glm::ivec3 &chunkPosition, const glm::ivec3 &blockPosition) noexcept
+void ChunkMesh::addFace(BlockSide face, const Block &block, const glm::ivec3 &chunkPosition, const glm::ivec3 &blockPosition)
 {
-	auto tex = tk::TextureAtlas::getInstance().getTextureCoords(block.textures[face]);
-	m_texCoords.insert(m_texCoords.end(), tex.begin(), tex.end());
-
-	// 4 vertices to add per face, 3 coords per vertex
-	for (unsigned i = 0; i < 4; i++)
+	try
 	{
-		unsigned index = 3 * i;
-		m_verticesPos.push_back(Faces::faces[face][index + 0] + chunkPosition.x * CHUNK_SIZE + blockPosition.x);
-		m_verticesPos.push_back(Faces::faces[face][index + 1] + chunkPosition.y * CHUNK_SIZE + blockPosition.y);
-		m_verticesPos.push_back(Faces::faces[face][index + 2] + chunkPosition.z * CHUNK_SIZE + blockPosition.z);
+		auto tex = tk::TextureAtlas::getInstance().getTextureCoords(block.textures[face]);
+		m_texCoords.insert(m_texCoords.end(), tex.begin(), tex.end());
+
+		// 4 vertices to add per face, 3 coords per vertex
+		for (unsigned i = 0; i < 4; i++)
+		{
+			unsigned index = 3 * i;
+			m_verticesPos.push_back(Faces::faces[face][index + 0] + chunkPosition.x * CHUNK_SIZE + blockPosition.x);
+			m_verticesPos.push_back(Faces::faces[face][index + 1] + chunkPosition.y * CHUNK_SIZE + blockPosition.y);
+			m_verticesPos.push_back(Faces::faces[face][index + 2] + chunkPosition.z * CHUNK_SIZE + blockPosition.z);
+		}
+
+		m_indices.insert(
+			m_indices.end(),
+			{m_indexOffset,
+			 m_indexOffset + 1,
+			 m_indexOffset + 2,
+
+			 m_indexOffset,
+			 m_indexOffset + 2,
+			 m_indexOffset + 3});
+
+		m_indexOffset += 4;
+		m_isGLDirty = true;
+		m_isEmpty = false;
 	}
-
-	m_indices.insert(
-		m_indices.end(),
-		{m_indexOffset,
-		 m_indexOffset + 1,
-		 m_indexOffset + 2,
-
-		 m_indexOffset,
-		 m_indexOffset + 2,
-		 m_indexOffset + 3});
-
-	m_indexOffset += 4;
-	m_isGLDirty = true;
-	m_isEmpty = false;
+	catch (RuntimeException &e)
+	{
+		e.pushCurrentContext(__FUNCTION__);
+		throw;
+	}
 }
 
 // private:

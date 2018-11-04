@@ -16,8 +16,8 @@ namespace tk
 {
 class ChunkMesh
 {
-public:
-	void addFace(BlockSide face, const Block &block, const glm::ivec3 &chunkPosition, const glm::ivec3 &blockPosition) noexcept;
+  public:
+	void addFace(BlockSide face, const Block &block, const glm::ivec3 &chunkPosition, const glm::ivec3 &blockPosition);
 	//inline RenderInfo getRenderInfo() noexcept { return {m_VAO, m_indices.size()}; }
 	inline GLuint getVAO() const { return m_VAO; }
 	inline unsigned getVerticesCount() const { return m_indices.size(); }
@@ -35,16 +35,16 @@ public:
 		m_indexOffset = 0;
 	};
 
-private:
+  private:
 	void pushToGL() noexcept;
 	void deleteFromGL() noexcept;
 
-private:
+  private:
 	std::vector<GLfloat> m_verticesPos;
 	std::vector<GLfloat> m_texCoords;
 	std::vector<GLuint> m_indices;
 	bool m_isGLDirty = false; // States if data is valid GPU side
-	bool m_isEmpty = true;		// States if there is data CPU side
+	bool m_isEmpty = true;	// States if there is data CPU side
 
 	GLuint m_VAO = 0, m_VBOvext = 0, m_VBOtex = 0, m_EBO = 0;
 

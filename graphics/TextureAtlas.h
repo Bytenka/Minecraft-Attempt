@@ -20,18 +20,20 @@ struct TextureData
 
 class TextureAtlas
 {
-public:
+  public:
 	static TextureAtlas &getInstance() noexcept
 	{
 		static TextureAtlas instance;
 		return instance;
 	}
 
-	std::array<GLfloat, 8> getTextureCoords(const std::string &textureName) noexcept;
-	inline GLuint getAtlas() const noexcept { return m_atlasID; }
+	void init();
+	std::array<GLfloat, 8> getTextureCoords(const std::string &textureName);
+	inline GLuint getAtlasID() const noexcept { return m_atlasID; }
 
-private:
+  private:
 	void loadAtlas(const std::string &path);
+	void loadTexCoords() noexcept;
 	std::array<GLfloat, 8> dataToGL(const TextureData &data) noexcept;
 	std::array<GLfloat, 2> toNormalizedCoordinates(const glm::ivec2 &pixelCoordinates) noexcept;
 
@@ -40,7 +42,10 @@ private:
 	std::map<std::string, TextureData> m_textures;
 	std::array<GLfloat, 8> m_invalidTexture;
 
-private:
+	bool m_isAtlasLoaded = false;
+	bool m_areCoordsLoaded = false;
+
+  private:
 	TextureAtlas();
 	~TextureAtlas();
 	TextureAtlas(const TextureAtlas &) = delete;

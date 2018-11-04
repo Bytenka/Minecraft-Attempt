@@ -4,6 +4,8 @@
 #include "../graphics/RenderEngine.h"
 #include "../graphics/Camera.h"
 
+#include <string>
+
 namespace tk
 {
 class RenderWindow : public Window

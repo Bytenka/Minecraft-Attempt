@@ -1,13 +1,11 @@
 #include "Application.h"
+#include "RenderWindow.h"
 
 #include "../utils/Exceptions.h"
 #include "../utils/Logging.h"
 #include "../utils/FPSCounter.h"
 
-#include "../graphics/ShaderManager.h"
-#include "../graphics/Image.h"
-#include "../graphics/Camera.h"
-#include "../graphics/RenderEngine.h"
+#include "../graphics/TextureAtlas.h"
 
 namespace tk
 {
@@ -78,6 +76,10 @@ void Application::startLoop()
 
         FPSCounter fps;
         fps.displayFPS = true;
+
+        LOG_DEBUG1("Loading texture atlas...");
+        TextureAtlas::getInstance().init();
+        LOG_DEBUG1("OK!");
 
         bool appShouldTerminate = false;
         while (!appShouldTerminate)

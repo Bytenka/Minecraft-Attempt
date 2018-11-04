@@ -1,4 +1,5 @@
 #include "ChunkRenderer.h"
+#include "../utils/Exceptions.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -15,17 +16,25 @@ ChunkRenderer::~ChunkRenderer()
 
 void ChunkRenderer::drawChunk(Chunk &chunk)
 {
-    ChunkMesh &mesh = chunk.getMesh();
-
-    if (mesh.isGLDirty())
+    try
     {
-        mesh.buildGL();
+        ChunkMesh &mesh = chunk.getMesh();
+
+        if (mesh.isGLDirty())
+        {
+            mesh.buildGL();
+        }
+
+        if (!mesh.isEmpty())
+        {
+            glBindVertexArray(mesh.getVAO());
+            glDrawElements(GL_TRIANGLES, mesh.getVerticesCount(), GL_UNSIGNED_INT, (void *)0);
+        }
     }
-
-    if (!mesh.isEmpty())
+    catch (RuntimeException &e)
     {
-        glBindVertexArray(mesh.getVAO());
-        glDrawElements(GL_TRIANGLES, mesh.getVerticesCount(), GL_UNSIGNED_INT, (void *)0);
+        e.pushCurrentContext(__FUNCTION__);
+        throw;
     }
 }
 } // namespace tk
